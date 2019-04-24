@@ -34,8 +34,8 @@ const bot = (channel, socket) => {
 			reconnect: false
 		},
 		identity: {
-			username: process.env.USERNAME,
-			password: process.env.PASSWORD
+			username: `${process.env.USERNAME}`,
+			password: `${process.env.PASSWORD}`
 		},
 		channels: [channel]
 	};
