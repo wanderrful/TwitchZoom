@@ -10,10 +10,7 @@ import "./App.css";
 const WINDOW_WIDTH = window.innerWidth;
 const WINDOW_HEIGHT = window.innerHeight;
 
-const WS_URL =
-  process.env.NODE_ENV === "production"
-    ? "http://104.248.4.129:8080"
-    : "http://localhost:8080";
+const WS_URL = "http://localhost:3001";
 
 class App extends Component {
   /* State for this component has:
@@ -177,7 +174,7 @@ class App extends Component {
   getChannelFromURL = () => {
     if (window.location.pathname !== '/') {
       const channel = window.location.pathname.replace('/', '').split('/')[0];
-      this.setState({ channel });
+      this.setState({ channel: channel, currentChannelName: channel });
       this.timeout = setTimeout(() => {
         this.handleWebsocket();
       }, 300);
@@ -224,7 +221,7 @@ class App extends Component {
             onClick={this.switchChannel}
             type="submit"
           >
-            Tune into a stream
+            Tune in!
           </button>
         </form>
         <TransitionGroup className="app-group">
