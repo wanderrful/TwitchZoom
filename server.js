@@ -3,6 +3,10 @@
 // Load process environment variables for .env file
 require('dotenv').config();
 
+console.log(process.env.USERNAME);
+console.log(process.env.PASSWORD);
+console.log(process.env.PORT);
+
 // Define import requirements
 const express = require("express");
 const path = require("path");
