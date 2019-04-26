@@ -10,7 +10,7 @@ import "./App.css";
 const WINDOW_WIDTH = window.innerWidth;
 const WINDOW_HEIGHT = window.innerHeight;
 
-const WS_URL = "http://localhost/";
+const WS_URL = "https://localhost/";
 
 class App extends Component {
   /* State for this component has:
