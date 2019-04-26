@@ -88,9 +88,11 @@ const bot = (channel, socket) => {
 }
 
 // Begin listening to the relevant Twitch chat and feeding messages to the front-end
+try {
 io.sockets.on('connection', (socket, username) => {
 	console.log(`** L90: back-end connection successful!`);
 	socket.on('message', channel => {
 		bot(channel, socket);
 	});
 });
+} catch (err) { console.log(err); }
