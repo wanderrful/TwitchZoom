@@ -36,7 +36,7 @@ class App extends Component {
     };
 
     this.timeout = null;
-    this.socket = io.connect(`${WS_URL}:${}`);
+    this.socket = io.connect(WS_URL);
   }
 
   getRandomColor = () => {
