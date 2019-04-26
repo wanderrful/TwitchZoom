@@ -46,8 +46,9 @@ const bot = (channel, socket) => {
 
 	const client = new tmi.client(tmiOptions);
 	client.connect()
-		.catch(err => { throw new Error(err) });
+		.catch(err => { console.warn(err) });
 	client.on('connected', (addr, port) => {
+		console.log(`** L55: successfully connected to font-end!`)
 		client.on('message', (channel, userstate, message, self) => {
 			/*	---- DATA RESPONSE FORMAT ----
 				channel:  #starladder5
@@ -87,6 +88,7 @@ const bot = (channel, socket) => {
 
 // Begin listening to the relevant Twitch chat and feeding messages to the front-end
 io.sockets.on('connection', (socket, username) => {
+	console.log(`** L90: back-end connection successful!`);
 	socket.on('message', channel => {
 		bot(channel, socket);
 	});
