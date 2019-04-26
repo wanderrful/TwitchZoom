@@ -10,7 +10,7 @@ import "./App.css";
 const WINDOW_WIDTH = window.innerWidth;
 const WINDOW_HEIGHT = window.innerHeight;
 
-const WS_URL = "http://localhost:3001";
+const WS_URL = "http://localhost:3001/";
 
 class App extends Component {
   /* State for this component has:
@@ -36,7 +36,7 @@ class App extends Component {
     };
 
     this.timeout = null;
-    this.socket = io.connect(WS_URL);
+    this.socket = io.connect(`${WS_URL}:${}`);
   }
 
   getRandomColor = () => {

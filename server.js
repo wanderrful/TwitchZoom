@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, "client/build")));
 
 // Render the React client as the root route 
 app.get("/", (req,res) => {
-	res.sendFile(path.join(__dirname + "/client/build/index.html"));
+	res.sendFile(path.join(__dirname + "client/build/index.html"), { backendPort: process.env.PORT });
 });
 
 // Let's run the thing!
@@ -73,6 +73,7 @@ const bot = (channel, socket) => {
 			  	message:  ало камбэечная, тайлу скоро придут
 			  	self:  false
 			*/
+			console.log(`[${channel}]: ${message}`);
 			socket.emit('message', { channel, userstate, message });
 		});
 		socket.on('disconnect', () => {
