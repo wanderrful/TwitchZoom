@@ -19,10 +19,6 @@ app.get("/", (req,res) => {
 	res.sendFile(path.join(__dirname + "client/build/index.html"), { backendPort: process.env.PORT });
 });
 
-// Let's run the thing!
-const httpServer = app.listen(process.env.PORT);
-const io = require('socket.io').listen(httpServer);
-
 // Define the Twitch Bot's behavior
 const bot = (channel, socket) => {
 	const tmiOptions = {
@@ -90,3 +86,7 @@ io.sockets.on('connection', (socket) => {
 		bot(channel, socket);
 	});
 });
+
+// Let's run the thing!
+const httpServer = app.listen(process.env.PORT);
+const io = require('socket.io')(httpServer);
