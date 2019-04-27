@@ -3,16 +3,11 @@
 // Load process environment variables for .env file
 require('dotenv').config();
 
-console.log(process.env.USERNAME);
-console.log(process.env.PASSWORD);
-console.log(process.env.PORT);
-
 // Define import requirements
 const express = require("express");
 const path = require("path");
 
 const tmi = require('tmi.js');
-const socketio = require('socket.io');
 
 const app = express();
 
@@ -26,7 +21,7 @@ app.get("/", (req,res) => {
 
 // Let's run the thing!
 const httpServer = app.listen(process.env.PORT);
-const io = socketio.listen(httpServer);
+const io = require('socket.io').listen(httpServer);
 
 // Define the Twitch Bot's behavior
 const bot = (channel, socket) => {
@@ -89,7 +84,7 @@ const bot = (channel, socket) => {
 
 // Begin listening to the relevant Twitch chat and feeding messages to the front-end
 
-io.sockets.on('connection', (socket, username) => {
+io.sockets.on('connection', (socket) => {
 	console.log(`** L90: back-end connection successful!`);
 	socket.on('message', channel => {
 		bot(channel, socket);
