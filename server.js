@@ -65,7 +65,7 @@ const bot = (channel, socket) => {
 				  username: 'necrus7',
 				  'message-type': 'chat'
 				}
-			  	message:  ало камбэечная, тайлу скоро придут
+			  	message:  asdf
 			  	self:  false
 			*/
 			console.log(`[${channel}]: ${message}`);
