@@ -78,15 +78,18 @@ const bot = (channel, socket) => {
 	});
 }
 
-// Begin listening to the relevant Twitch chat and feeding messages to the front-end
-
-io.sockets.on('connection', (socket) => {
-	console.log(`** L90: back-end connection successful!`);
-	socket.on('message', channel => {
-		bot(channel, socket);
-	});
-});
-
 // Let's run the thing!
 const httpServer = app.listen(process.env.PORT);
 const io = require('socket.io')(httpServer);
+
+// Begin listening to the relevant Twitch chat and feeding messages to the front-end
+io.sockets.on('connection', (socket) => {
+	console.log(`** L90: back-end connection successful!`);
+	socket.on('message', channel => {
+		console.log(`** registering bot`);
+		bot(channel, socket);
+	});
+	socket.on('time', message => console.log(message));
+});
+
+setInterval(() => io.emit('time', new Date().toTimeString()), 1000);
