@@ -14,6 +14,12 @@ const app = express();
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "client/build")));
 
+app.use((req, res, next) => {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+	next();
+});
+
 // Render the React client as the root route 
 app.get("/", (req,res) => {
 	res.sendFile(path.join(__dirname + "client/build/index.html"), { backendPort: process.env.PORT });
@@ -83,7 +89,7 @@ const httpServer = app.listen(process.env.PORT);
 const io = require('socket.io')(httpServer);
 
 // Begin listening to the relevant Twitch chat and feeding messages to the front-end
-io.sockets.on('connection', (socket) => {
+io.on('connection', (socket) => {
 	console.log(`** L90: back-end connection successful!`);
 	socket.on('message', channel => {
 		console.log(`** registering bot`);
