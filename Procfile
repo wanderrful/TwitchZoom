@@ -1,1 +1,1 @@
-web: npm run start -p 3001
+web: PORT=$PORT npm run start

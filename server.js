@@ -25,7 +25,7 @@ app.get("/", (req,res) => {
 });
 
 // Let's run the thing!
-const httpServer = app.listen(3001);
+const httpServer = app.listen(process.env.PORT);
 const io = socketio.listen(httpServer);
 
 // Define the Twitch Bot's behavior
