@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import classNames from "classnames";
-// import io from "socket.io-client";
-import WebSocket from "ws";
 
 import globalEmotes from "./data/emotes.json";
 
