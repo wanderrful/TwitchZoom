@@ -77,7 +77,7 @@ const bot = (channel, socket) => {
 			  	message:  asdf
 			  	self:  false
 			*/
-			console.log(`[${channel}]: ${message}`);
+			console.log(`[${channel.toLowerCase()}]: ${message}`);
 			socket.send(JSON.stringify({
 				channel,
 				userstate,
@@ -103,7 +103,7 @@ console.log(`** WebSocket.Server created: ${JSON.stringify(wss.address(), null, 
 wss.on('connection', ws => {
 	console.log(`L97: Established connection with new client!`);
 	ws.onmessage = channel => {
-		console.log(`** Initializing new Bot for channel ${channel}...`);
-		bot(channel, ws);
+		console.log(`** Initializing new Bot for channel ${channel.data}...`);
+		bot(channel.data, ws);
 	};
 });
