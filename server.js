@@ -11,6 +11,13 @@ const tmi = require('tmi.js');
 
 const app = express();
 
+// Let's run the thing!
+const server = require("http").Server(app);
+const WebSocket = require("ws");
+//const io = require('socket.io')(server);
+
+server.listen(process.env.PORT);
+
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "client/build")));
 
@@ -21,11 +28,11 @@ app.use((req, res, next) => {
 });
 
 // Render the React client as the root route 
-app.get("/", (req,res) => {
-	res.sendFile(path.join(__dirname + "client/build/index.html"), { backendPort: process.env.PORT });
+app.get("/", (req, res) => {
+	res.sendFile(path.join(__dirname + "client/build/index.html"));
 });
 
-// Define the Twitch Bot's behavior
+// Create the Twitch Bot and define its behavior
 const bot = (channel, socket) => {
 	const tmiOptions = {
 		options: {
@@ -45,7 +52,7 @@ const bot = (channel, socket) => {
 	client.connect()
 		.catch(err => { console.warn(err) });
 	client.on('connected', (addr, port) => {
-		console.log(`** L55: successfully connected to font-end!`)
+		console.log(`L55: Bot successfully connected to channel ${channel}!`)
 		client.on('message', (channel, userstate, message, self) => {
 			/*	---- DATA RESPONSE FORMAT ----
 				channel:  #starladder5
@@ -71,31 +78,32 @@ const bot = (channel, socket) => {
 			  	self:  false
 			*/
 			console.log(`[${channel}]: ${message}`);
-			socket.emit('message', { channel, userstate, message });
+			socket.send(JSON.stringify({
+				channel,
+				userstate,
+				message
+			}));
 		});
-		socket.on('disconnect', () => {
+		socket.onclose = e => {
 			client.disconnect();
-			socket.disconnect();
-			console.log('Client disconnected');
-		});
+			console.log('Socket closed (client disconnect)');
+		};
 	});
 	client.on('disconnected', reason => {
-		console.log('Disconnected: ', reason);
+		socket.terminate();
+		console.log('Bot Disconnected: ', reason);
 	});
 }
 
-// Let's run the thing!
-const httpServer = app.listen(process.env.PORT);
-const io = require('socket.io')(httpServer);
-
 // Begin listening to the relevant Twitch chat and feeding messages to the front-end
-io.on('connection', (socket) => {
-	console.log(`** L90: back-end connection successful!`);
-	socket.on('message', channel => {
-		console.log(`** registering bot`);
-		bot(channel, socket);
-	});
-	socket.on('time', message => console.log(message));
-});
+const wss = new WebSocket.Server({ server });
 
-setInterval(() => io.emit('time', new Date().toTimeString()), 1000);
+console.log(`** WebSocket.Server created: ${JSON.stringify(wss.address(), null, 2)}`);
+
+wss.on('connection', ws => {
+	console.log(`L97: Established connection with new client!`);
+	ws.onmessage = channel => {
+		console.log(`** Initializing new Bot for channel ${channel}...`);
+		bot(channel, ws);
+	};
+});

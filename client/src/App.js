@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { TransitionGroup, CSSTransition } from "react-transition-group";
 import classNames from "classnames";
-import io from "socket.io-client";
+// import io from "socket.io-client";
+import WebSocket from "ws";
 
 import globalEmotes from "./data/emotes.json";
 
@@ -10,7 +11,7 @@ import "./App.css";
 const WINDOW_WIDTH = window.innerWidth;
 const WINDOW_HEIGHT = window.innerHeight;
 
-const WS_URL = "/";
+const WS_URL = window.location.origin.replace(/^http/, 'ws');
 
 class App extends Component {
   /* State for this component has:
@@ -36,7 +37,9 @@ class App extends Component {
     };
 
     this.timeout = null;
-    this.socket = io.connect(WS_URL);
+    this.socket = new WebSocket(WS_URL);
+    this.socket.onopen = () => console.log("** Socket connection established with back-end server!");
+    this.socket.onclose = e => console.log("** Socket connection closed");
   }
 
   getRandomColor = () => {
@@ -78,10 +81,10 @@ class App extends Component {
     if (channel.trim() !== "") {
       this.toggleControlsVisibility();
       this.toggleStream();
-      this.socket.emit("message", channel);
-      this.socket.on("message", response => {
-        this.handleMessageState(response);
-      });
+      this.socket.send(channel);
+      this.socket.onmessage = message => {
+        this.handleMessageState(JSON.parse(message));
+      };
     }
   };
 
@@ -129,11 +132,11 @@ class App extends Component {
         const emote = (
           <img
             className="emote"
-            src={`http://static-cdn.jtvnw.net/emoticons/v1/${
+            src={ `http://static-cdn.jtvnw.net/emoticons/v1/${
               globalEmotes[word].id
-            }/3.0`}
-            key={globalEmotes[word].id + i}
-            alt={globalEmotes[word].id}
+              }/3.0` }
+            key={ globalEmotes[word].id + i }
+            alt={ globalEmotes[word].id }
           />
         );
 
@@ -150,23 +153,23 @@ class App extends Component {
   displayMessages = () =>
     this.state.messages.map(({ id, height, color, user, message }) => (
       <CSSTransition
-        key={id}
-        timeout={10000}
+        key={ id }
+        timeout={ 10000 }
         classNames="fly"
         unmountOnExit
-        onEntered={() => {
+        onEntered={ () => {
           this.removeMessage(id);
-        }}
+        } }
       >
         <div
           className="msg-container"
-          style={{
+          style={ {
             top: height + "%",
             color
-          }}
+          } }
         >
-          <span className="msg-user">{user}</span>:{" "}
-          <span className="msg-content">{this.parseMessage(message)}</span>
+          <span className="msg-user">{ user }</span>:{ " " }
+          <span className="msg-content">{ this.parseMessage(message) }</span>
         </div>
       </CSSTransition>
     ));
@@ -202,43 +205,43 @@ class App extends Component {
     return (
       <div className="app-container">
         <form
-          onSubmit={this.handleChannelSearch}
-          className={classNames("form-group", {
+          onSubmit={ this.handleChannelSearch }
+          className={ classNames("form-group", {
             controlsInvisible: this.state.areControlsInvisible
-          })}
+          }) }
         >
           <input
             type="text"
             name="channel"
-            value={channel}
+            value={ channel }
             className="form-control"
-            autoFocus={true}
+            autoFocus={ true }
             placeholder="Type a twitch channel to get chat comments..."
-            onChange={this.handleInputChange}
+            onChange={ this.handleInputChange }
           />
           <button
             className="btn btn-primary btn-sm btn-block"
-            onClick={this.switchChannel}
+            onClick={ this.switchChannel }
             type="submit"
           >
             Tune in!
           </button>
         </form>
         <TransitionGroup className="app-group">
-          {showStream &&
+          { showStream &&
             channel.trim() !== "" &&
             !retrieveStream && (
               <iframe
-                src={`https://player.twitch.tv/?channel=${currentChannelName}`}
-                height={WINDOW_HEIGHT}
-                width={WINDOW_WIDTH}
+                src={ `https://player.twitch.tv/?channel=${currentChannelName}` }
+                height={ WINDOW_HEIGHT }
+                width={ WINDOW_WIDTH }
                 frameBorder="0"
                 scrolling="no"
-                title={currentChannelName}
-                allowFullScreen={true}
+                title={ currentChannelName }
+                allowFullScreen={ true }
               />
-            )}
-          {messages.length > 0 && this.displayMessages()}
+            ) }
+          { messages.length > 0 && this.displayMessages() }
         </TransitionGroup>
       </div>
     );
