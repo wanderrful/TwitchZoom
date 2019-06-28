@@ -14,7 +14,6 @@ const app = express();
 // Let's run the thing!
 const server = require("http").Server(app);
 const WebSocket = require("ws");
-//const io = require('socket.io')(server);
 
 server.listen(process.env.PORT);
 
@@ -36,7 +35,7 @@ app.get("/", (req, res) => {
 const bot = (channel, socket) => {
 	const tmiOptions = {
 		options: {
-			debug: true
+			debug: false
 		},
 		connection: {
 			reconnect: false
@@ -54,30 +53,6 @@ const bot = (channel, socket) => {
 	client.on('connected', (addr, port) => {
 		console.log(`L55: Bot successfully connected to channel ${channel}!`)
 		client.on('message', (channel, userstate, message, self) => {
-			/*	---- DATA RESPONSE FORMAT ----
-				channel:  #starladder5
-				userstate:  {
-				  badges: null,
-				  color: '#8A2BE2',
-				  'display-name': 'necrus7',
-				  emotes: null,
-				  id: '35e7ee43-3928-48b5-8db1-b8274bb36dd1',
-				  mod: false,
-				  'room-id': '28633374',
-				  subscriber: false,
-				  'tmi-sent-ts': '1537018245483',
-				  turbo: false,
-				  'user-id': '135853874',
-				  'user-type': null,
-				  'emotes-raw': null,
-				  'badges-raw': null,
-				  username: 'necrus7',
-				  'message-type': 'chat'
-				}
-			  	message:  asdf
-			  	self:  false
-			*/
-			console.log(`[${channel.toLowerCase()}]: ${message}`);
 			socket.send(JSON.stringify({
 				channel,
 				userstate,

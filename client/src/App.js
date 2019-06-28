@@ -79,10 +79,8 @@ class App extends Component {
     if (channel.trim() !== "") {
       this.toggleControlsVisibility();
       this.toggleStream();
-      console.log(`** Tuning into channel ${channel.toLowerCase()}...`);
       this.socket.send(channel.toLowerCase());
       this.socket.onmessage = message => {
-        console.log("** ON MESSAGE ENTRY");
         this.handleMessageState(JSON.parse(message.data));
       };
     }
@@ -97,6 +95,7 @@ class App extends Component {
   switchChannel = () => {
     const { channel } = this.state;
     if (channel.trim().length !== 0) {
+      this.socket.terminate();
       this.setState({ currentChannelName: channel.toLowerCase() });
       // this.setState({ channel: "" });
     }
