@@ -6,38 +6,21 @@ import globalEmotes from "./data/emotes.json";
 
 import "./App.css";
 
-const WINDOW_WIDTH = window.innerWidth;
-const WINDOW_HEIGHT = window.innerHeight;
-
 const WS_URL = window.location.origin.replace(/^http/, 'ws');
 
 class App extends Component {
-  /* State for this component has:
-  * - channel: string
-    * - messages: Array<{
-    *    id: number
-  *    height: number
-  *    user: string
-    *    message: string
-    *  color: string
-  *   }>
-    */
   constructor(props) {
     super(props);
 
     this.state = {
       channel: "",
       messages: [],
-      areControlsInvisible: false,
-      showStream: false,
       retrieveStream: false,
       currentChannelName: ""
     };
 
+    this.socket = null;
     this.timeout = null;
-    this.socket = new WebSocket(WS_URL);
-    this.socket.onopen = () => console.log("** Socket connection established with back-end server!");
-    this.socket.onclose = e => console.log("** Socket connection closed");
   }
 
   getRandomColor = () => {
@@ -55,10 +38,12 @@ class App extends Component {
   };
 
   handleMessageState = response => {
-    const { userstate, message } = response;
+    const content = JSON.parse(response.data);
+    const { userstate, message } = content;
     // Keep messages inside viewport
+    const windowHeight = window.innerHeight;
     const randomHeight = this.getRandomHeight();
-    const height = randomHeight >= WINDOW_HEIGHT ? WINDOW_HEIGHT : randomHeight;
+    const height = randomHeight >= windowHeight ? windowHeight : randomHeight;
     const newMessage = {
       id: userstate.id,
       user: userstate.username,
@@ -74,43 +59,32 @@ class App extends Component {
     this.setState({ messages });
   };
 
-  handleWebsocket = () => {
+  handleSwitchChannel = () => {
     const { channel } = this.state;
-    if (channel.trim() !== "") {
-      this.toggleControlsVisibility();
-      this.toggleStream();
-      this.socket.send(channel.toLowerCase());
-      this.socket.onmessage = message => {
-        this.handleMessageState(JSON.parse(message.data));
-      };
+    if (channel.trim().length > 0) {
+      this.setState({ currentChannelName: channel });
+      this.establishSocketConnection();
     }
   };
 
-  toggleStream = () => {
-    this.setState({
-      showStream: !this.state.showStream
-    });
-  };
+  establishSocketConnection = () => {
+    if (this.socket !== null && this.socket.readyState !== WebSocket.CLOSED) this.socket.close();
 
-  switchChannel = () => {
-    const { channel } = this.state;
-    if (channel.trim().length !== 0) {
-      this.socket.terminate();
-      this.setState({ currentChannelName: channel.toLowerCase() });
-      // this.setState({ channel: "" });
-    }
-  };
+    this.socket = new WebSocket(WS_URL);
+    this.socket.onopen = this.onOpenedSocket;
+    this.socket.onclose = e => console.log("** Socket connection closed");
+    this.socket.onmessage = this.handleMessageState;
+  }
 
-  toggleControlsVisibility = () => {
-    this.setState({
-      // areControlsInvisible: !this.state.areControlsInvisible
-      areControlsInvisible: true
-    });
-  };
+  onOpenedSocket = e => {
+    const { currentChannelName } = this.state;
+    console.log("** Socket connection established with back-end server!");
+    this.socket.send(currentChannelName);
+  }
 
   handleChannelSearch = event => {
     event.preventDefault();
-    this.handleWebsocket();
+    this.handleSwitchChannel();
   };
 
   handleInputChange = ({ currentTarget: { name, value } }) => {
@@ -149,55 +123,57 @@ class App extends Component {
     return splitText;
   };
 
-  displayMessages = () =>
-    this.state.messages.map(({ id, height, color, user, message }) => (
-      <CSSTransition
-        key={ id }
-        timeout={ 10000 }
-        classNames="fly"
-        unmountOnExit
-        onEntered={ () => {
-          this.removeMessage(id);
+  displayMessages = () => this.state.messages.map(({ id, height, color, user, message }) => (
+    <CSSTransition
+      key={ id }
+      timeout={ 10000 }
+      classNames="fly"
+      unmountOnExit
+      onEntered={ () => {
+        this.removeMessage(id);
+      } }
+    >
+      <div
+        className="msg-container"
+        style={ {
+          top: height + "%",
+          color
         } }
       >
-        <div
-          className="msg-container"
-          style={ {
-            top: height + "%",
-            color
-          } }
-        >
-          <span className="msg-user">{ user }</span>:{ " " }
-          <span className="msg-content">{ this.parseMessage(message) }</span>
-        </div>
-      </CSSTransition>
-    ));
+        <span className="msg-user">{ user }</span>:{ " " }
+        <span className="msg-content">{ this.parseMessage(message) }</span>
+      </div>
+    </CSSTransition>
+  ));
 
-  getChannelFromURL = () => {
+  parseChannelFromURL = () => {
     if (window.location.pathname !== '/') {
       const channel = window.location.pathname.replace('/', '').split('/')[0];
-      this.setState({ channel: channel, currentChannelName: channel });
-      this.timeout = setTimeout(() => {
-        this.handleWebsocket();
-      }, 300);
+      if (channel !== "") {
+        this.handleSwitchChannel();
+        this.setState({ channel: channel, currentChannelName: channel });
+        this.timeout = setTimeout(() => {
+          this.handleSwitchChannel();
+        }, 300);
+      }
     }
   };
 
   componentDidMount() {
-    this.getChannelFromURL();
-    this.handleWebsocket();
+    this.parseChannelFromURL();
   }
 
   componentWillUnmount() {
     this.socket.terminate();
-    clearTimeout(this.timeout);
+    if (!!this.timeout) {
+      clearTimeout(this.timeout);
+    }
   }
 
   render() {
     const {
       channel,
       messages,
-      showStream,
       retrieveStream,
       currentChannelName
     } = this.state;
@@ -206,7 +182,7 @@ class App extends Component {
         <form
           onSubmit={ this.handleChannelSearch }
           className={ classNames("form-group", {
-            controlsInvisible: this.state.areControlsInvisible
+            controlsInvisible: !!currentChannelName.length
           }) }
         >
           <input
@@ -220,20 +196,18 @@ class App extends Component {
           />
           <button
             className="btn btn-primary btn-sm btn-block"
-            onClick={ this.switchChannel }
             type="submit"
           >
             Tune in!
           </button>
         </form>
         <TransitionGroup className="app-group">
-          { showStream &&
-            channel.trim() !== "" &&
+          { currentChannelName.trim() !== "" &&
             !retrieveStream && (
               <iframe
                 src={ `https://player.twitch.tv/?channel=${currentChannelName}` }
-                height={ WINDOW_HEIGHT }
-                width={ WINDOW_WIDTH }
+                height={ window.innerHeight }
+                width={ window.innerWidth }
                 frameBorder="0"
                 scrolling="no"
                 title={ currentChannelName }
