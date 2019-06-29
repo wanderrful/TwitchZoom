@@ -27,7 +27,7 @@ app.use((req, res, next) => {
 });
 
 // Render the React client as the root route 
-app.get("/", (req, res) => {
+app.use("/", (req, res) => {
 	res.sendFile(path.join(__dirname + "client/build/index.html"));
 });
 
