@@ -6,10 +6,14 @@ require('dotenv').config();
 // Define import requirements
 const express = require("express");
 const path = require("path");
+const helmet = require("helmet");
 
 const tmi = require('tmi.js');
 
 const app = express();
+
+// Apply middleware
+app.use(helmet());
 
 // Let's run the thing!
 const server = require("http").Server(app);

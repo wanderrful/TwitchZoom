@@ -126,6 +126,10 @@ body {
     the shadow becomes detached from the element
   text-shadow: 0 1.5em 0 #333333;
   */
+  
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
 }
 
 .msg-user {

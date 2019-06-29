@@ -15,7 +15,6 @@ class App extends Component {
     this.state = {
       channel: "",
       messages: [],
-      retrieveStream: false,
       currentChannelName: ""
     };
 
@@ -34,7 +33,8 @@ class App extends Component {
   };
 
   getRandomHeight = () => {
-    return Math.max(5, Math.min(95, Math.round(100 * Math.random())));
+    const lowerThird = Math.random() >= 0.5;
+    return lowerThird ? Math.floor(70 + (25 * Math.random())) : Math.floor(30 - (30 * Math.random()));
   };
 
   handleMessageState = response => {
@@ -174,7 +174,6 @@ class App extends Component {
     const {
       channel,
       messages,
-      retrieveStream,
       currentChannelName
     } = this.state;
     return (
@@ -202,18 +201,17 @@ class App extends Component {
           </button>
         </form>
         <TransitionGroup className="app-group">
-          { currentChannelName.trim() !== "" &&
-            !retrieveStream && (
-              <iframe
-                src={ `https://player.twitch.tv/?channel=${currentChannelName}` }
-                height={ window.innerHeight }
-                width={ window.innerWidth }
-                frameBorder="0"
-                scrolling="no"
-                title={ currentChannelName }
-                allowFullScreen={ true }
-              />
-            ) }
+          { currentChannelName.trim() !== "" && (
+            <iframe
+              src={ `https://player.twitch.tv/?channel=${currentChannelName}` }
+              height={ window.innerHeight }
+              width={ window.innerWidth }
+              frameBorder="0"
+              scrolling="no"
+              title={ currentChannelName }
+              allowFullScreen={ true }
+            />
+          ) }
           { messages.length > 0 && this.displayMessages() }
         </TransitionGroup>
       </div>
