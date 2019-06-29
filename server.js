@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 
 // Render the React client as the root route 
 app.use("/", (req, res) => {
-	res.sendFile(path.join(__dirname + "client/build/index.html"));
+	res.sendFile(path.join(__dirname, "/client/build/index.html"));
 });
 
 // Create the Twitch Bot and define its behavior
