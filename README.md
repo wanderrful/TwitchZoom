@@ -1,4 +1,4 @@
-![Twitch Zoom in action](https://i.imgur.com/pUBcGqZ.gifv)
+![Twitch Zoom in action](https://i.imgur.com/pUBcGqZ.gif)
 
 # Twitch Zoom!
 
