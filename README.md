@@ -1,3 +1,5 @@
+![Twitch Zoom in action](https://i.imgur.com/pUBcGqZ.gifv)
+
 # Twitch Zoom!
 
 Watch Twitch streams the Japanese way with this refreshing new take on an old concept!
